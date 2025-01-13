@@ -1,0 +1,220 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+
+const posts = await getCollection('blog');
+const sortedPosts = posts.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+---
+
+<Layout title="Blog">
+    <div class="posts">
+        {sortedPosts.map(post => (
+            <article class="blog-post">
+                <header class="post-header">
+                    <h2>{post.data.title}</h2>
+                    <div class="meta-container">
+                        <p class="date">
+							{post.data.pubDate.toLocaleDateString('en-US', {
+								year: 'numeric',
+								month: 'long',
+								day: 'numeric'
+							})}
+						</p>
+                        <a href={`/${post.slug}`} class="permalink" title="Permanent link to this post">
+                            <span>Permalink</span>
+                        </a>
+                    </div>
+                    <p class="description">{post.data.description}</p>
+                </header>
+
+                {post.data.link && (
+                    <div class="link-box">
+                        <a href={post.data.link} target="_blank" rel="noopener noreferrer">
+                            {post.data.linkPreviewImage && (
+                                <div class="link-preview">
+                                    <img
+                                        src={post.data.linkPreviewImage}
+                                        alt="Preview of linked content"
+                                        loading="lazy"
+                                    />
+                                </div>
+                            )}
+                            <div class="link-content">
+                                <span class="link-icon">🔗</span>
+                                <span class="link-text">{post.data.link}</span>
+                            </div>
+                        </a>
+                    </div>
+                )}
+
+                <div class="content">
+                    <div class="text-content">{post.data.text}</div>
+                </div>
+            </article>
+        ))}
+    </div>
+</Layout>
+
+<style>
+    .posts {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+    .blog-post {
+        position: relative;
+        z-index: 1;
+        background: rgba(26, 27, 35, 0.85);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 16px var(--card-shadow);
+        overflow: hidden;
+        border: 1px solid rgba(var(--accent), 0.2);
+    }
+    .post-header {
+        margin-bottom: 1.5rem;
+    }
+    h2 {
+        font-size: 2rem;
+        margin: 0 0 0.5rem 0;
+        font-family: 'Space Mono', monospace;
+        letter-spacing: -0.5px;
+    }
+    .date {
+        color: var(--text-color-muted);
+        font-size: 0.9rem;
+        margin: 0;
+        font-family: 'Space Mono', monospace;
+    }
+    .description {
+        color: var(--text-color-muted);
+        font-size: 1.1rem;
+        margin-bottom: 0;
+        font-style: italic;
+        border-left: 2px solid rgb(var(--accent));
+        padding-left: 1rem;
+    }
+    .tags {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+    .tag {
+        font-size: 0.8rem;
+        color: rgb(var(--accent));
+        background: rgba(var(--accent), 0.1);
+        padding: 0.25rem 0.75rem;
+        border-radius: 1rem;
+        font-family: 'Space Mono', monospace;
+    }
+    .link-box {
+        background: var(--link-box-bg);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(var(--accent), 0.3);
+        padding: 0;
+        margin: 1rem 0 2rem;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
+    .link-box:hover {
+        background: rgba(var(--accent), 0.1);
+        border-color: rgba(var(--accent), 0.8);
+    }
+    .link-box a {
+        display: flex;
+        flex-direction: column;
+        text-decoration: none;
+        color: var(--text-color);
+    }
+    .link-preview {
+        width: 100%;
+        height: 200px;
+        overflow: hidden;
+        border-bottom: 1px solid rgba(var(--accent), 0.2);
+        position: relative;
+    }
+    .link-preview::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(
+            to bottom,
+            transparent 0%,
+            transparent 80%,
+            rgba(var(--accent), 0.1) 100%
+        );
+        pointer-events: none;
+    }
+    .link-preview img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+    .link-box:hover .link-preview img {
+        transform: scale(1.05);
+    }
+    .link-content {
+        padding: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-family: 'Space Mono', monospace;
+    }
+    .link-icon {
+        font-size: 1.2rem;
+    }
+    .link-text {
+        color: rgb(var(--accent-text));
+        word-break: break-all;
+        transition: color 0.3s ease;
+    }
+    .link-box:hover .link-text {
+        color: rgb(var(--accent-light));
+    }
+    .content {
+        line-height: 1.6;
+        font-size: 1.1rem;
+    }
+    .text-content {
+        white-space: pre-wrap;
+    }
+    .post-footer {
+		background: transparent;
+        margin-top: 1.5rem;
+        padding-top: 0.75rem;
+        border-top: 1px solid rgba(var(--accent), 0.2);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .meta {
+        color: var(--text-color-muted);
+        font-size: 0.9rem;
+        font-family: 'Space Mono', monospace;
+    }
+    .permalink {
+        display: flex;
+        align-items: center;
+        text-decoration: none;
+        color: rgb(var(--accent));
+        font-size: 0.9rem;
+        transition: all 0.2s ease;
+        font-family: 'Space Mono', monospace;
+    }
+    .permalink:hover {
+        background: rgba(var(--accent), 0.1);
+    }
+    .meta-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+</style>

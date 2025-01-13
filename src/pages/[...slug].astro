@@ -1,0 +1,178 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../layouts/Layout.astro';
+
+export async function getStaticPaths() {
+	const posts = await getCollection('blog');
+	return posts.map(post => ({
+		params: { slug: post.slug },
+		props: { post },
+	}));
+}
+
+const { post } = Astro.props;
+---
+
+<Layout title={`${post.data.title} - Detail View`}>
+	<div class="detail-container">
+		<header class="post-header">
+			<h1>{post.data.title}</h1>
+			<div class="meta">
+				<time datetime={post.data.pubDate.toISOString()}>
+					{post.data.pubDate.toLocaleDateString('en-US', {
+						year: 'numeric',
+						month: 'long',
+						day: 'numeric'
+					})}
+				</time>
+			</div>
+		</header>
+
+		{post.data.link && (
+			<div class="link-box">
+				<a href={post.data.link} target="_blank" rel="noopener noreferrer">
+					{post.data.linkPreviewImage && (
+						<div class="link-preview">
+							<img
+								src={post.data.linkPreviewImage}
+								alt="Preview of linked content"
+								loading="lazy"
+							/>
+						</div>
+					)}
+					<div class="link-content">
+						<span class="link-icon">🔗</span>
+						<span class="link-text">{post.data.link}</span>
+					</div>
+				</a>
+			</div>
+		)}
+
+		<div class="content">
+			<div class="text-content">{post.data.text}</div>
+		</div>
+
+		<footer class="post-footer">
+			<div class="author">Written by {post.data.author}</div>
+			<a href="/" class="back-link">
+				← Back to blog
+			</a>
+		</footer>
+	</div>
+</Layout>
+
+<style>
+	.detail-container {
+		max-width: 800px;
+		margin: 0 auto;
+		padding: 2rem;
+	}
+	.post-header {
+		margin-bottom: 2rem;
+		text-align: center;
+	}
+	h1 {
+		font-size: 3rem;
+		margin: 0 0 1rem 0;
+		line-height: 1.2;
+	}
+	.meta {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 1rem;
+		color: var(--text-color-muted);
+	}
+	.tags {
+		display: flex;
+		gap: 0.5rem;
+		flex-wrap: wrap;
+		justify-content: center;
+	}
+	.tag {
+		font-size: 0.9rem;
+		color: rgb(var(--accent));
+		background: rgba(var(--accent), 0.1);
+		padding: 0.25rem 0.75rem;
+		border-radius: 1rem;
+	}
+	.link-box {
+		background: var(--link-box-bg);
+		border-left: 4px solid rgb(var(--accent));
+		margin: 2rem 0;
+		border-radius: 0 8px 8px 0;
+		overflow: hidden;
+		transition: all 0.3s ease;
+	}
+	.link-box:hover {
+		transform: translateY(-2px);
+		box-shadow: 0 4px 12px var(--card-shadow);
+	}
+	.link-box a {
+		display: flex;
+		flex-direction: column;
+		text-decoration: none;
+		color: var(--text-color);
+	}
+	.link-preview {
+		width: 100%;
+		height: 300px;
+		overflow: hidden;
+		border-bottom: 1px solid rgba(var(--accent), 0.2);
+	}
+	.link-preview img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		transition: transform 0.3s ease;
+	}
+	.link-box:hover .link-preview img {
+		transform: scale(1.05);
+	}
+	.link-content {
+		padding: 1rem;
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
+	.link-icon {
+		font-size: 1.2rem;
+	}
+	.link-text {
+		color: rgb(var(--accent));
+		word-break: break-all;
+	}
+	.content {
+		font-size: 1.2rem;
+		line-height: 1.8;
+		margin: 2rem 0;
+	}
+	.text-content {
+		white-space: pre-wrap;
+	}
+	.post-footer {
+		margin-top: 1.5rem;
+		padding-top: 0.75rem;
+		border-top: 1px solid var(--card-shadow);
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+	}
+	.author {
+		font-style: italic;
+		color: var(--text-color-muted);
+	}
+	.back-link {
+		text-decoration: none;
+		color: rgb(var(--accent));
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.5rem 1rem;
+		border-radius: 4px;
+		transition: all 0.2s ease;
+	}
+	.back-link:hover {
+		background: rgba(var(--accent), 0.1);
+	}
+</style>

@@ -1,0 +1,421 @@
+---
+interface Props {
+	title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="description" content="a Hoopy Frood - A blog for really amazingly together people" />
+		<meta name="viewport" content="width=device-width" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="generator" content={Astro.generator} />
+		<title>{title} | a Hoopy Frood</title>
+		<script is:inline>
+			// Always use dark theme
+			document.documentElement.classList.add('dark');
+
+			// Function to wrap random letters with glowing spans
+			function addGlowingLetters() {
+				const textNodes = [];
+				function findTextNodes(node) {
+					// Skip script and style tags
+					if (node.tagName === 'SCRIPT' || node.tagName === 'STYLE') {
+						return;
+					}
+					if (node.nodeType === 3 && node.textContent.trim()) {
+						textNodes.push(node);
+					} else {
+						node.childNodes.forEach(child => findTextNodes(child));
+					}
+				}
+
+				// Target all content including blog posts with more specific selectors
+				const contentNodes = document.querySelectorAll(`
+					article h1,
+					article h2,
+					article h3,
+					article h4,
+					article h5,
+					article h6,
+					p.description
+				`);
+
+				contentNodes.forEach(node => {
+					console.log('Processing node:', node.tagName, node.className);
+					findTextNodes(node);
+				});
+
+				textNodes.forEach(textNode => {
+					const text = textNode.textContent;
+					const letters = text.split('');
+					const wrappedText = letters.map((letter, index) => {
+						// Roughly every 100 characters, add a glowing span
+						if (letter.trim() && Math.random() < 0.02) {
+							return `<span class="glow-letter">${letter}</span>`;
+						}
+						return letter;
+					}).join('');
+
+					const span = document.createElement('span');
+					span.innerHTML = wrappedText;
+					textNode.replaceWith(span);
+				});
+			}
+
+			// Run after the page loads and after dynamic content loads
+			window.addEventListener('load', () => {
+				console.log('Page loaded, running addGlowingLetters');
+				addGlowingLetters();
+			});
+
+			// Also run when the URL changes (for client-side navigation)
+			document.addEventListener('astro:page-load', () => {
+				console.log('Astro page loaded, running addGlowingLetters');
+				addGlowingLetters();
+			});
+
+			// Run again after a short delay to catch any dynamically loaded content
+			window.addEventListener('load', () => {
+				setTimeout(addGlowingLetters, 1000);
+			});
+		</script>
+	</head>
+	<body>
+		<header class="site-header">
+			<nav>
+				<div class="nav-brand">
+					<a href="/">a Hoopy Frood</a>
+				</div>
+				<div class="nav-links">
+					<a href="/about">About</a>
+				</div>
+			</nav>
+		</header>
+		<main>
+			<slot />
+		</main>
+		<footer>
+			<p>&copy; {new Date().getFullYear()} a Hoopy Frood. All rights reserved.</p>
+		</footer>
+	</body>
+</html>
+
+<style is:global>
+	@import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Space+Grotesk:wght@300;400;600&display=swap');
+
+	:root {
+		/* Core colors */
+		--accent: 0, 255, 200;  /* Digital green */
+		--accent-light: 100, 255, 220;
+		--accent-dark: 0, 180, 140;
+		--accent-text: 0, 220, 170; /* More readable accent for text */
+		--glow-color: rgba(0, 255, 200, 0.7);
+
+		/* Dark theme only */
+		--bg-color: #0a0b11;
+		--text-color: #e0e2e8;
+		--text-color-muted: #9a9ba5;
+		--header-bg: #000000;
+		--header-text: #e0e2e8;
+		--card-bg: rgba(26, 27, 35, 0.8);
+		--card-shadow: rgba(0, 0, 0, 0.3);
+		--link-box-bg: linear-gradient(to right, rgba(26, 27, 35, 0.9), rgba(31, 32, 40, 0.9));
+		--date-color: #9a9ba5;
+		--star-color: rgba(255, 255, 255, 0.15);
+		--geometric-color-1: rgba(0, 255, 200, 1);
+		--geometric-color-2: rgba(0, 140, 140, 1);
+		--geometric-color-3: rgba(255, 255, 255, 1);
+	}
+
+	html {
+		font-family: 'Space Grotesk', system-ui, sans-serif;
+		background: var(--bg-color);
+		color: var(--text-color);
+		position: relative;
+		overflow-x: hidden;
+	}
+
+	/* Enhanced starfield effect
+	html::before {
+		content: '';
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background:
+			radial-gradient(circle at center, transparent 0%, var(--bg-color) 100%),
+			repeating-linear-gradient(transparent, transparent 15px, var(--star-color) 15px, transparent 16px),
+			repeating-linear-gradient(90deg, transparent, transparent 15px, var(--star-color) 15px, transparent 16px);
+		background-size: 100% 100%, 100px 100px, 100px 100px;
+		opacity: 0.7;
+		pointer-events: none;
+		z-index: -2;
+	} */
+
+	/* Shimmering geometric background */
+	html::after {
+		content: '';
+		position: fixed;
+		top: -200%;
+		left: -200%;
+		right: -200%;
+		bottom: -200%;
+		background:
+			linear-gradient(217deg, var(--geometric-color-1), transparent 50%),
+			linear-gradient(127deg, var(--geometric-color-2), transparent 50%),
+			linear-gradient(336deg, var(--geometric-color-3), transparent 50%);
+		background-size: 100% 100%;
+		transform: rotate(-15deg);
+		animation: shimmerEffect 25s ease-in-out infinite;
+		pointer-events: none;
+		z-index: -1;
+		opacity: 1;
+		mix-blend-mode: screen;
+	}
+
+	@keyframes shimmerEffect {
+		0% {
+			background-position: 0% 0%;
+			transform: rotate(-15deg) scale(1);
+		}
+		25% {
+			background-position: 100% 0%;
+			transform: rotate(-30deg) scale(3);
+		}
+		50% {
+			background-position: 100% 100%;
+			transform: rotate(-45deg) scale(.7);
+		}
+		75% {
+			background-position: 0% 100%;
+			transform: rotate(-30deg) scale(.9);
+		}
+		100% {
+			background-position: 0% 0%;
+			transform: rotate(-15deg) scale(1);
+		}
+	}
+
+	body {
+		margin: 0;
+		padding: 0;
+		min-height: 100vh;
+		display: flex;
+		flex-direction: column;
+	}
+
+	main {
+		flex: 1;
+		width: 800px;
+		max-width: calc(100% - 2rem);
+		margin: 0 auto;
+		padding: 7rem 1rem 2rem 1rem;
+	}
+
+	.site-header {
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+		z-index: 10;
+		background: rgba(0, 0, 0, 0.6);
+		backdrop-filter: blur(8px);
+		-webkit-backdrop-filter: blur(8px);
+		color: var(--header-text);
+		padding: 1rem;
+		transition: all 0.3s ease;
+		border-bottom: 2px solid rgba(var(--accent), 0.3);
+	}
+
+	nav {
+		width: 800px;
+		max-width: calc(100% - 2rem);
+		margin: 0 auto;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+	}
+
+	.nav-brand a {
+		color: var(--header-text);
+		text-decoration: none;
+		font-family: 'Space Mono', monospace;
+		font-size: 1.5rem;
+		font-weight: bold;
+		letter-spacing: -0.5px;
+		position: relative;
+		padding: 0.5rem 1rem;
+		border: 2px solid transparent;
+		transition: border-color 0.3s ease;
+	}
+
+	.nav-brand a:hover {
+		border-color: rgb(var(--accent));
+	}
+
+	.nav-links {
+		display: flex;
+		align-items: center;
+		gap: 1.5rem;
+	}
+
+	.nav-links a {
+		color: var(--header-text);
+		text-decoration: none;
+		font-family: 'Space Mono', monospace;
+		padding: 0.5rem 1rem;
+		border: 2px solid transparent;
+		transition: border-color 0.3s ease;
+	}
+
+	.nav-links a:hover {
+		border-color: rgb(var(--accent));
+	}
+
+	.theme-toggle {
+		background: none;
+		border: 2px solid rgb(var(--accent));
+		color: var(--header-text);
+		cursor: pointer;
+		padding: 0.5rem;
+		font-size: 1.2rem;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		transition: all 0.3s ease;
+		border-radius: 4px;
+	}
+
+	.theme-toggle:hover {
+		background: rgba(var(--accent), 0.2);
+		transform: scale(1.05);
+	}
+
+	footer {
+		background: var(--header-bg);
+		color: var(--header-text);
+		text-align: center;
+		padding: 1rem;
+		margin-top: 2rem;
+		transition: background-color 0.3s ease;
+		border-top: 2px solid rgb(var(--accent));
+		font-family: 'Space Mono', monospace;
+		font-size: 0.9rem;
+	}
+
+	/* Blog post styles */
+	.blog-post {
+		position: relative;
+		z-index: 1;
+		background: rgba(26, 27, 35, 0.85);
+		backdrop-filter: blur(10px);
+		-webkit-backdrop-filter: blur(10px);
+		box-shadow: 0 4px 16px var(--card-shadow);
+		border: 1px solid rgba(var(--accent), 0.2);
+	}
+
+	h1, h2, h3 {
+		font-family: 'Space Mono', monospace;
+		letter-spacing: -0.5px;
+	}
+
+	.date {
+		font-family: 'Space Mono', monospace;
+		color: var(--date-color);
+	}
+
+	.link-box {
+		background: var(--link-box-bg);
+		backdrop-filter: blur(10px);
+		border: 1px solid rgba(var(--accent), 0.3);
+		transition: all 0.3s ease;
+	}
+
+	.link-box:hover {
+		background: rgba(var(--accent), 0.1);
+		border-color: rgba(var(--accent), 0.8);
+	}
+
+	.link-text {
+		color: rgb(var(--accent-text));
+		transition: color 0.3s ease;
+	}
+
+	.link-box:hover .link-text {
+		color: rgb(var(--accent-light));
+	}
+
+	/* Inline link styling */
+	main a.social-link {
+		color: rgb(var(--accent-text));
+		text-decoration: none;
+		position: relative;
+		padding: 0.3em 0.5em;
+		margin: 0 0.1em;
+		transition: all 0.3s ease;
+		background: var(--link-box-bg);
+		border: 1px solid rgba(var(--accent), 0.3);
+		border-radius: 4px;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.3em;
+		line-height: 1;
+		bottom: -3px;
+	}
+
+	main a.social-link:hover {
+		background: rgba(var(--accent), 0.1);
+		border-color: rgba(var(--accent), 0.8);
+		color: rgb(var(--accent-light));
+	}
+
+	main a.social-link[href*="github.com"]::before {
+		content: '';
+		display: inline-block;
+		width: 1em;
+		height: 1em;
+		background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill='%2300ffc8' d='M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12'/%3E%3C/svg%3E");
+		background-repeat: no-repeat;
+		background-position: center;
+		background-size: contain;
+	}
+
+	main a.social-link[href*="bsky.app"]::before {
+		content: '';
+		display: inline-block;
+		width: 1em;
+		height: 1em;
+		background-image: url("data:image/svg+xml,%3Csvg width='600' height='530' version='1.1' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='m135.72 44.03c66.496 49.921 138.02 151.14 164.28 205.46 26.262-54.316 97.782-155.54 164.28-205.46 47.98-36.021 125.72-63.892 125.72 24.795 0 17.712-10.155 148.79-16.111 170.07-20.703 73.984-96.144 92.854-163.25 81.433 117.3 19.964 147.14 86.092 82.697 152.22-122.39 125.59-175.91-31.511-189.63-71.766-2.514-7.3797-3.6904-10.832-3.7077-7.8964-0.0174-2.9357-1.1937 0.51669-3.7077 7.8964-13.714 40.255-67.233 197.36-189.63 71.766-64.444-66.128-34.605-132.26 82.697-152.22-67.108 11.421-142.55-7.4491-163.25-81.433-5.9562-21.282-16.111-152.36-16.111-170.07 0-88.687 77.742-60.816 125.72-24.795z' fill='%2300ffc8'/%3E%3C/svg%3E");
+		background-repeat: no-repeat;
+		background-position: center;
+		background-size: contain;
+	}
+
+	/* Glowing letter effect */
+	.glow-letter {
+		position: relative;
+		color: rgb(var(--accent));
+		animation: letterPulse 2s ease-in-out infinite;
+		text-shadow: 0 0 8px var(--glow-color);
+	}
+
+	@keyframes letterPulse {
+		0%, 100% {
+			text-shadow: 0 0 8px var(--glow-color);
+			opacity: 0.9;
+		}
+		50% {
+			text-shadow: 0 0 15px var(--glow-color),
+						0 0 20px var(--glow-color),
+						0 0 25px var(--glow-color);
+			opacity: 1;
+		}
+	}
+</style>
